@@ -1,14 +1,16 @@
 Name:           dumb-init
 Version:        1.1.3
-Release:        7%{?dist}
+Release:        8%{?dist}
 Summary:        Entry-point for containers that proxies signals
 
 License:        MIT
 URL:            https://github.com/Yelp/dumb-init
 Source0:        %{url}/archive/v%{version}/%{name}-%{version}.tar.gz
 
-BuildRequires: gcc
-BuildRequires:  help2man
+BuildRequires:  gcc, help2man
+
+# for %%check test to work
+BuildRequires:  python, python2-mock, python2-pytest
 
 # /bin/xxd of vim-common of is needed for non-released versions
 # BuildRequires:  vim-common
@@ -31,9 +33,14 @@ PID 1 inside minimal container environments (such as Docker).
 gcc -std=gnu99 %{optflags} -o %{name} dumb-init.c 
 help2man --no-discard-stderr --include debian/help2man --no-info --name '%{summary}' ./%{name} > %{name}.1
 
+%check
+PATH=.:$PATH py.test tests/
+
 %install
 install -Dpm0755 %{name} %{buildroot}%{_bindir}/%{name}
 install -Dpm0644 %{name}.1 %{buildroot}%{_mandir}/man1/%{name}.1
+
+
 
 %files
 %{_bindir}/%{name}
@@ -42,6 +49,9 @@ install -Dpm0644 %{name}.1 %{buildroot}%{_mandir}/man1/%{name}.1
 %doc README.md
 
 %changelog
+* Fri Aug 25 2016 Muayyad Alsadi <alsadi@gmail.com> - 1.1.3-8
+- run tests
+
 * Wed Aug 17 2016 Muayyad Alsadi <alsadi@gmail.com> - 1.1.3-7
 - let manpage automatically marked as document
 
